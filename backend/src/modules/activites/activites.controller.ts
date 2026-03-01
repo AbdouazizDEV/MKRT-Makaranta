@@ -29,11 +29,13 @@ export class ActiviteController {
   /**
    * GET /api/activites/:id
    * Détail d'une activité
+   * Pour les utilisateurs non authentifiés, retourne uniquement les activités publiées
    */
   async getById(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { id } = req.params;
-      const activite = await this.service.getById(id);
+      const isAuthenticated = !!req.user; // Vérifier si l'utilisateur est authentifié
+      const activite = await this.service.getById(id, isAuthenticated);
       res.json(ApiResponseBuilder.success(activite));
     } catch (error) {
       next(error);

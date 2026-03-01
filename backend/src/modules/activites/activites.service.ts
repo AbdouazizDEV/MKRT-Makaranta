@@ -26,12 +26,20 @@ export class ActiviteService {
 
   /**
    * Récupère une activité par son ID
+   * @param id - ID de l'activité
+   * @param isAuthenticated - Si false, vérifie que l'activité est publiée
    */
-  async getById(id: string): Promise<Activite> {
+  async getById(id: string, isAuthenticated = false): Promise<Activite> {
     const activite = await this.repository.findById(id);
     if (!activite) {
       throw ApiError.notFound('Activité non trouvée');
     }
+    
+    // Si l'utilisateur n'est pas authentifié, vérifier que l'activité est publiée
+    if (!isAuthenticated && !activite.published) {
+      throw ApiError.notFound('Activité non trouvée');
+    }
+    
     return activite;
   }
 
