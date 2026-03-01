@@ -86,6 +86,8 @@ export function useAuth(shouldCheck = true) {
               role: payload.role,
             });
             console.log('✅ User défini depuis token décodé');
+            // Rediriger vers /admin/dashboard
+            window.location.href = '/admin/dashboard';
           } catch (e) {
             console.error('Erreur décodage token:', e);
             // Utiliser les données de la réponse si le décodage échoue
