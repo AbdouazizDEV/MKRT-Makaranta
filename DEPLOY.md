@@ -22,12 +22,20 @@ Ce guide explique comment déployer l'application LUMINA sur Vercel.
    - Sélectionnez le repository `MKRT-Makaranta`
    - Vercel détectera automatiquement Next.js
 
-3. **Configuration du projet**
-   - **Root Directory** : `frontend`
+3. **Configuration du projet** ⚠️ IMPORTANT
+   
+   **AVANT de cliquer sur "Deploy", configurez le Root Directory :**
+   
+   - Cliquez sur **"Settings"** (ou "Configure Project")
+   - Dans la section **"General"**, trouvez **"Root Directory"**
+   - Cliquez sur **"Edit"** et entrez : `frontend`
+   - Cliquez sur **"Save"**
    - **Framework Preset** : Next.js (détecté automatiquement)
    - **Build Command** : `npm run build` (par défaut)
    - **Output Directory** : `.next` (par défaut)
    - **Install Command** : `npm install` (par défaut)
+   
+   ⚠️ **Sans cette configuration, le build échouera !**
 
 4. **Variables d'environnement**
    Ajoutez les variables suivantes dans les paramètres du projet :
