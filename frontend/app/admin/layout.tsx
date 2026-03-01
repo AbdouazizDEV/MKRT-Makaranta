@@ -26,14 +26,40 @@ export default function AdminLayout({
   }
 
   useEffect(() => {
-    if (!loading && !user) {
-      // Vérifier aussi localStorage au cas où
-      const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
-      if (!token) {
-        router.replace('/admin/login');
+    // Attendre un peu pour que useAuth ait le temps de charger
+    const checkAuth = setTimeout(() => {
+      if (!loading) {
+        // Vérifier localStorage directement
+        const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+        
+        if (!token) {
+          console.log('❌ Pas de token, redirection vers login');
+          router.replace('/admin/login');
+          return;
+        }
+        
+        // Si on a un token mais pas d'utilisateur, essayer de décoder le token
+        if (!user && token) {
+          try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            console.log('✅ Token valide trouvé, utilisateur:', payload.email);
+            // L'utilisateur sera défini par useAuth, on attend juste
+            // Ne pas rediriger si on a un token valide
+          } catch (e) {
+            console.error('❌ Token invalide:', e);
+            localStorage.removeItem('auth_token');
+            router.replace('/admin/login');
+          }
+        }
       }
-    }
+    }, 100); // Attendre 100ms pour que useAuth charge
+    
+    return () => clearTimeout(checkAuth);
   }, [user, loading, router]);
+
+  // Vérifier aussi localStorage directement si user n'est pas encore chargé
+  const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+  const hasToken = !!token;
 
   if (loading) {
     return (
@@ -43,7 +69,18 @@ export default function AdminLayout({
     );
   }
 
-  if (!user) {
+  // Si pas d'utilisateur mais qu'on a un token, attendre un peu
+  if (!user && hasToken) {
+    // Le token existe, useAuth devrait le charger bientôt
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-[#F5F0E8]">
+        <p className="text-gray-600">Chargement...</p>
+      </div>
+    );
+  }
+
+  if (!user && !hasToken) {
+    // Pas d'utilisateur et pas de token, rediriger
     return null;
   }
 

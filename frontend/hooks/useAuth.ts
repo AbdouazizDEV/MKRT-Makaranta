@@ -86,8 +86,6 @@ export function useAuth(shouldCheck = true) {
               role: payload.role,
             });
             console.log('✅ User défini depuis token décodé');
-            // Rediriger vers /admin/dashboard
-            window.location.href = '/admin/dashboard';
           } catch (e) {
             console.error('Erreur décodage token:', e);
             // Utiliser les données de la réponse si le décodage échoue
@@ -107,11 +105,12 @@ export function useAuth(shouldCheck = true) {
         
         toast.success('Connexion réussie');
         
-        // Attendre un peu pour que l'état soit mis à jour
-        await new Promise(resolve => setTimeout(resolve, 100));
+        // Attendre un peu pour que localStorage soit écrit et l'état mis à jour
+        await new Promise(resolve => setTimeout(resolve, 300));
         
-        // Rediriger
-        console.log('Redirection vers /admin/dashboard');
+        // Rediriger avec window.location pour forcer un rechargement complet
+        // Cela permet au layout admin de détecter le token dans localStorage
+        console.log('🔄 Redirection vers /admin/dashboard');
         window.location.href = '/admin/dashboard';
         return true;
       }
