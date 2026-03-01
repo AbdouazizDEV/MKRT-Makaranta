@@ -8,10 +8,21 @@ import { User } from '@/types/user';
 /**
  * Vérifie si l'utilisateur est authentifié
  * En vérifiant la présence d'un cookie (géré par le serveur)
+ * Ne fait l'appel que si on est sur une page admin
  */
 export async function checkAuth(): Promise<User | null> {
+  // Ne pas faire l'appel sur les pages publiques
+  if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/admin')) {
+    return null;
+  }
+
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/me`, {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
+    if (!apiUrl) {
+      return null;
+    }
+
+    const response = await fetch(`${apiUrl}/auth/me`, {
       credentials: 'include',
     });
 

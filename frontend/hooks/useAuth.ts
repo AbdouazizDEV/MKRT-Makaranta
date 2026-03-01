@@ -9,17 +9,27 @@ import { User, LoginDTO } from '@/types/user';
 import { ApiResponse } from '@/lib/api.types';
 import toast from 'react-hot-toast';
 
-export function useAuth() {
+export function useAuth(shouldCheck = true) {
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(shouldCheck);
   const router = useRouter();
 
   useEffect(() => {
-    checkAuth();
-  }, []);
+    if (shouldCheck) {
+      checkAuth();
+    } else {
+      setLoading(false);
+    }
+  }, [shouldCheck]);
 
   const checkAuth = async () => {
     try {
+      // Ne faire l'appel que si on est sur une page admin
+      if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/admin')) {
+        setLoading(false);
+        return;
+      }
+      
       const response = await api.get<ApiResponse<User>>('/auth/me');
       if (response.data.success && response.data.data) {
         setUser(response.data.data);

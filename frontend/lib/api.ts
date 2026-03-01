@@ -53,10 +53,14 @@ api.interceptors.response.use(
       const { status, data } = error.response;
       
       if (status === 401) {
-        // Non authentifié - rediriger vers login
-        if (typeof window !== 'undefined' && !window.location.pathname.includes('/admin/login')) {
+        // Non authentifié - rediriger vers login uniquement sur les pages admin
+        if (typeof window !== 'undefined' && 
+            window.location.pathname.startsWith('/admin') && 
+            !window.location.pathname.includes('/admin/login')) {
           window.location.href = '/admin/login';
         }
+        // Ne pas rejeter l'erreur pour les pages publiques
+        // Laissez le composant gérer l'erreur silencieusement
       }
       
       // Retourner l'erreur avec le message de l'API
