@@ -17,7 +17,7 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const { user, loading } = useAuth();
+  const { user, loading } = useAuth(true); // Vérifier l'auth sur les pages admin
   const router = useRouter();
 
   // Ne pas appliquer le layout admin sur la page de login
@@ -27,7 +27,7 @@ export default function AdminLayout({
 
   useEffect(() => {
     if (!loading && !user) {
-      router.push('/admin/login');
+      router.replace('/admin/login');
     }
   }, [user, loading, router]);
 

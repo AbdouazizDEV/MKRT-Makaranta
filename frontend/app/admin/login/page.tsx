@@ -19,7 +19,7 @@ const loginSchema = z.object({
 type LoginFormData = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
-  const { login } = useAuth();
+  const { login } = useAuth(false); // Ne pas vérifier l'auth au chargement sur la page de login
   const {
     register,
     handleSubmit,
@@ -29,7 +29,8 @@ export default function LoginPage() {
   });
 
   const onSubmit = async (data: LoginFormData) => {
-    await login(data);
+    const success = await login(data);
+    // La redirection est gérée dans le hook useAuth
   };
 
   return (

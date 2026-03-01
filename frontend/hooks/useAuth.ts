@@ -47,7 +47,15 @@ export function useAuth(shouldCheck = true) {
       if (response.data.success && response.data.data) {
         setUser(response.data.data);
         toast.success('Connexion réussie');
-        router.push('/admin/dashboard');
+        
+        // Attendre un peu pour que le cookie soit défini
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        // Vérifier à nouveau l'auth pour s'assurer que le cookie est bien défini
+        await checkAuth();
+        
+        // Utiliser window.location pour forcer un rechargement complet
+        window.location.href = '/admin/dashboard';
         return true;
       }
       return false;
