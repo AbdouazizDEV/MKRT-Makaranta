@@ -7,32 +7,30 @@ import { User } from '@/types/user';
 
 /**
  * Vérifie si l'utilisateur est authentifié
- * En vérifiant la présence d'un cookie (géré par le serveur)
- * Ne fait l'appel que si on est sur une page admin
+ * En vérifiant la présence d'un token dans localStorage
+ * Plus besoin d'appeler l'API
  */
-export async function checkAuth(): Promise<User | null> {
-  // Ne pas faire l'appel sur les pages publiques
-  if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/admin')) {
+export function checkAuth(): User | null {
+  if (typeof window === 'undefined') {
+    return null;
+  }
+
+  const token = localStorage.getItem('auth_token');
+  if (!token) {
     return null;
   }
 
   try {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
-    if (!apiUrl) {
-      return null;
-    }
-
-    const response = await fetch(`${apiUrl}/auth/me`, {
-      credentials: 'include',
-    });
-
-    if (response.ok) {
-      const data = await response.json();
-      return data.data || null;
-    }
-
-    return null;
+    // Décoder le token JWT pour récupérer les infos utilisateur
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    return {
+      id: payload.id,
+      email: payload.email,
+      role: payload.role,
+    };
   } catch {
+    // Token invalide, le supprimer
+    localStorage.removeItem('auth_token');
     return null;
   }
 }

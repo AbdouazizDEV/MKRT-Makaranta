@@ -22,53 +22,69 @@ export function useAuth(shouldCheck = true) {
     }
   }, [shouldCheck]);
 
-  const checkAuth = async () => {
-    try {
-      // Ne faire l'appel que si on est sur une page admin
-      if (typeof window !== 'undefined' && !window.location.pathname.startsWith('/admin')) {
-        setLoading(false);
-        return;
+  const checkAuth = () => {
+    // Vérifier uniquement si un token existe dans localStorage
+    // Plus besoin d'appeler /api/auth/me
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('auth_token');
+      if (token) {
+        try {
+          // Décoder le token JWT pour récupérer les infos utilisateur
+          const payload = JSON.parse(atob(token.split('.')[1]));
+          setUser({
+            id: payload.id,
+            email: payload.email,
+            role: payload.role,
+          });
+        } catch {
+          // Token invalide, le supprimer
+          localStorage.removeItem('auth_token');
+          setUser(null);
+        }
+      } else {
+        setUser(null);
       }
-      
-      const response = await api.get<ApiResponse<User>>('/auth/me');
-      if (response.data.success && response.data.data) {
-        setUser(response.data.data);
-      }
-    } catch {
-      setUser(null);
-    } finally {
-      setLoading(false);
     }
+    setLoading(false);
   };
 
   const login = async (credentials: LoginDTO) => {
     try {
       const response = await api.post<ApiResponse<User>>('/auth/login', credentials);
-      console.log('Login response:', response);
       
       if (response.data.success && response.data.data) {
-        setUser(response.data.data);
-        
-        // Récupérer le token depuis le header X-Auth-Token (fallback pour cross-domain)
+        // Récupérer le token depuis le header X-Auth-Token
         const token = response.headers['x-auth-token'] || response.headers['X-Auth-Token'];
+        
         if (token && typeof token === 'string') {
-          // Stocker le token dans localStorage comme fallback
+          // Stocker le token dans localStorage
           localStorage.setItem('auth_token', token);
-          console.log('Token stocké dans localStorage');
+          
+          // Décoder le token pour récupérer les infos utilisateur
+          try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            setUser({
+              id: payload.id,
+              email: payload.email,
+              role: payload.role,
+            });
+          } catch {
+            // Utiliser les données de la réponse si le décodage échoue
+            setUser(response.data.data);
+          }
+        } else {
+          // Si pas de token dans le header, utiliser les données de la réponse
+          setUser(response.data.data);
         }
         
         toast.success('Connexion réussie');
         
-        // Attendre un peu pour que le cookie soit défini (si disponible)
-        await new Promise(resolve => setTimeout(resolve, 300));
-        
-        // Utiliser window.location pour forcer un rechargement complet
-        window.location.href = '/admin/dashboard';
+        // Rediriger immédiatement
+        router.push('/admin/dashboard');
         return true;
       }
       return false;
     } catch (error: unknown) {
-      console.error('Login error:', error);
       const message = error instanceof Error ? error.message : 'Erreur de connexion';
       toast.error(message);
       return false;

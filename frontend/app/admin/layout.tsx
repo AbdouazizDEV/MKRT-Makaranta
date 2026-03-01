@@ -27,7 +27,11 @@ export default function AdminLayout({
 
   useEffect(() => {
     if (!loading && !user) {
-      router.replace('/admin/login');
+      // Vérifier aussi localStorage au cas où
+      const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+      if (!token) {
+        router.replace('/admin/login');
+      }
     }
   }, [user, loading, router]);
 
