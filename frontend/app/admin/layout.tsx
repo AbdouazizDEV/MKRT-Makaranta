@@ -28,23 +28,27 @@ export default function AdminLayout({
   useEffect(() => {
     // Ne rediriger vers login que si on n'a vraiment pas de token
     // Si on a un token, attendre que useAuth le charge
-    if (!loading) {
-      const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
-      
-      // Si pas de token ET pas d'utilisateur, rediriger vers login
-      if (!token && !user) {
-        console.log('❌ Pas de token ni utilisateur, redirection vers login');
-        router.replace('/admin/login');
-        return;
+    const timeoutId = setTimeout(() => {
+      if (!loading) {
+        const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+        
+        // Si pas de token ET pas d'utilisateur, rediriger vers login
+        if (!token && !user) {
+          console.log('❌ Pas de token ni utilisateur, redirection vers login');
+          router.replace('/admin/login');
+          return;
+        }
+        
+        // Si on a un token mais pas d'utilisateur après 500ms, c'est suspect
+        // Mais on attend quand même un peu plus
+        if (token && !user) {
+          console.log('⏳ Token présent, attente chargement utilisateur...');
+          // Ne pas rediriger, attendre que useAuth charge
+        }
       }
-      
-      // Si on a un token mais pas d'utilisateur, attendre un peu
-      // useAuth devrait charger l'utilisateur depuis le token
-      if (token && !user) {
-        console.log('⏳ Token présent, attente chargement utilisateur...');
-        // Ne pas rediriger, attendre que useAuth charge
-      }
-    }
+    }, 500); // Attendre 500ms avant de vérifier
+    
+    return () => clearTimeout(timeoutId);
   }, [user, loading, router]);
 
   // Vérifier aussi localStorage directement si user n'est pas encore chargé
@@ -63,7 +67,7 @@ export default function AdminLayout({
   // Ne pas rediriger immédiatement, laisser useAuth faire son travail
   if (!user && hasToken) {
     // Le token existe, useAuth devrait le charger
-    // Attendre un peu avant de rediriger
+    // Attendre jusqu'à 2 secondes avant de rediriger
     return (
       <div className="flex items-center justify-center min-h-screen bg-[#F5F0E8]">
         <p className="text-gray-600">Chargement...</p>
