@@ -47,8 +47,12 @@ export class AuthController {
         path: cookieOptions.path,
       });
       
-      // Aussi envoyer le token dans le header pour le frontend (fallback)
+      // IMPORTANT: Envoyer le token dans le header pour le frontend (nécessaire pour cross-domain)
+      // Axios peut accéder aux headers personnalisés
       res.setHeader('X-Auth-Token', authResponse.token);
+      res.setHeader('Access-Control-Expose-Headers', 'X-Auth-Token'); // Permettre au frontend de lire ce header
+      
+      console.log('🔑 Token envoyé dans header X-Auth-Token');
 
       res.json(ApiResponseBuilder.success(authResponse.user, 'Connexion réussie'));
     } catch (error) {

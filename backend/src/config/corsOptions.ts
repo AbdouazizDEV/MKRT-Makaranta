@@ -52,7 +52,7 @@ const corsOptions: CorsOptions = {
   credentials: true, // Permet l'envoi de cookies
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-  exposedHeaders: ['Set-Cookie'],
+  exposedHeaders: ['Set-Cookie', 'X-Auth-Token'], // Exposer le header X-Auth-Token pour le frontend
   optionsSuccessStatus: 200, // Pour les navigateurs plus anciens
 };
 

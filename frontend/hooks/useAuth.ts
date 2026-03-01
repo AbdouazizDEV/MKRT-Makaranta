@@ -51,40 +51,57 @@ export function useAuth(shouldCheck = true) {
   const login = async (credentials: LoginDTO) => {
     try {
       const response = await api.post<ApiResponse<User>>('/auth/login', credentials);
+      console.log('Login response:', response);
+      console.log('Response headers:', response.headers);
       
       if (response.data.success && response.data.data) {
         // Récupérer le token depuis le header X-Auth-Token
-        const token = response.headers['x-auth-token'] || response.headers['X-Auth-Token'];
+        // Axios met les headers en minuscules
+        const token = response.headers['x-auth-token'] || 
+                     response.headers['X-Auth-Token'] ||
+                     (response.headers as any)['x-auth-token'];
+        
+        console.log('Token from header:', token);
         
         if (token && typeof token === 'string') {
           // Stocker le token dans localStorage
           localStorage.setItem('auth_token', token);
+          console.log('Token stocké dans localStorage');
           
           // Décoder le token pour récupérer les infos utilisateur
           try {
             const payload = JSON.parse(atob(token.split('.')[1]));
-            setUser({
+            const userData = {
               id: payload.id,
               email: payload.email,
               role: payload.role,
-            });
-          } catch {
+            };
+            setUser(userData);
+            console.log('User défini depuis token:', userData);
+          } catch (e) {
+            console.error('Erreur décodage token:', e);
             // Utiliser les données de la réponse si le décodage échoue
             setUser(response.data.data);
           }
         } else {
+          console.warn('Pas de token dans les headers, utilisation des données de réponse');
           // Si pas de token dans le header, utiliser les données de la réponse
           setUser(response.data.data);
         }
         
         toast.success('Connexion réussie');
         
-        // Rediriger immédiatement
-        router.push('/admin/dashboard');
+        // Attendre un peu pour que l'état soit mis à jour
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        // Rediriger
+        console.log('Redirection vers /admin/dashboard');
+        window.location.href = '/admin/dashboard';
         return true;
       }
       return false;
     } catch (error: unknown) {
+      console.error('Login error:', error);
       const message = error instanceof Error ? error.message : 'Erreur de connexion';
       toast.error(message);
       return false;
