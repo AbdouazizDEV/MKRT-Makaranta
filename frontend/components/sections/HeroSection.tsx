@@ -19,7 +19,7 @@ export function HeroSection() {
       <div className="absolute inset-0">
         {!imageError ? (
           <Image
-            src="/hero-bg.jpg"
+            src="https://res.cloudinary.com/dhivn2ahm/image/upload/v1772402784/48979936098_bbbcd311b1_6k_yvq2a8.webp"
             alt="LUMINA - Éducation et autonomisation"
             fill
             priority
