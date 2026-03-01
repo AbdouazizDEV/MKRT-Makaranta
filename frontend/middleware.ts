@@ -1,29 +1,15 @@
 /**
  * Middleware Next.js pour protéger les routes admin
+ * Note: L'authentification est maintenant gérée par le layout admin avec localStorage
+ * Ce middleware ne fait plus de vérification pour éviter les conflits
  */
 
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
-
-  // Vérifier si on accède à une route admin
-  if (pathname.startsWith('/admin')) {
-    // Exclure la route de login
-    if (pathname === '/admin/login') {
-      return NextResponse.next();
-    }
-
-    // Vérifier la présence du cookie token
-    const token = request.cookies.get('token');
-
-    if (!token) {
-      // Rediriger vers la page de login
-      return NextResponse.redirect(new URL('/admin/login', request.url));
-    }
-  }
-
+  // Laisser passer toutes les requêtes
+  // L'authentification est gérée côté client par le layout admin
   return NextResponse.next();
 }
 
