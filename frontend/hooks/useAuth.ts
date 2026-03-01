@@ -44,15 +44,26 @@ export function useAuth(shouldCheck = true) {
   const login = async (credentials: LoginDTO) => {
     try {
       const response = await api.post<ApiResponse<User>>('/auth/login', credentials);
+      console.log('Login response:', response);
+      
       if (response.data.success && response.data.data) {
         setUser(response.data.data);
         toast.success('Connexion réussie');
         
+        // Vérifier si le cookie est présent dans la réponse
+        console.log('Response headers:', response.headers);
+        
         // Attendre un peu pour que le cookie soit défini
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise(resolve => setTimeout(resolve, 500));
         
         // Vérifier à nouveau l'auth pour s'assurer que le cookie est bien défini
-        await checkAuth();
+        try {
+          await checkAuth();
+          console.log('Auth check successful after login');
+        } catch (authError) {
+          console.error('Auth check failed after login:', authError);
+          // Continuer quand même, le cookie pourrait être défini
+        }
         
         // Utiliser window.location pour forcer un rechargement complet
         window.location.href = '/admin/dashboard';
@@ -60,6 +71,7 @@ export function useAuth(shouldCheck = true) {
       }
       return false;
     } catch (error: unknown) {
+      console.error('Login error:', error);
       const message = error instanceof Error ? error.message : 'Erreur de connexion';
       toast.error(message);
       return false;

@@ -29,15 +29,26 @@ export class AuthController {
       // Définir le token en cookie httpOnly
       // En production, utiliser 'none' pour sameSite car frontend et backend sont sur des domaines différents
       const isProduction = process.env.NODE_ENV === 'production';
-      res.cookie('token', authResponse.token, {
+      const cookieOptions = {
         httpOnly: true,
         secure: isProduction, // HTTPS requis en production
-        sameSite: isProduction ? 'none' : 'strict', // 'none' pour cross-domain, 'strict' pour same-domain
+        sameSite: isProduction ? ('none' as const) : ('strict' as const), // 'none' pour cross-domain, 'strict' pour same-domain
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 jours
         path: '/', // Accessible sur tout le site
-      });
+        domain: undefined, // Ne pas spécifier de domaine pour permettre cross-domain
+      };
+      
+      res.cookie('token', authResponse.token, cookieOptions);
 
-      console.log('🍪 Cookie défini avec sameSite:', isProduction ? 'none' : 'strict');
+      console.log('🍪 Cookie défini avec options:', {
+        httpOnly: cookieOptions.httpOnly,
+        secure: cookieOptions.secure,
+        sameSite: cookieOptions.sameSite,
+        path: cookieOptions.path,
+      });
+      
+      // Aussi envoyer le token dans le header pour le frontend (fallback)
+      res.setHeader('X-Auth-Token', authResponse.token);
 
       res.json(ApiResponseBuilder.success(authResponse.user, 'Connexion réussie'));
     } catch (error) {

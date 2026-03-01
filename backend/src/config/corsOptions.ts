@@ -53,6 +53,7 @@ const corsOptions: CorsOptions = {
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   exposedHeaders: ['Set-Cookie'],
+  optionsSuccessStatus: 200, // Pour les navigateurs plus anciens
 };
 
 export default corsOptions;
