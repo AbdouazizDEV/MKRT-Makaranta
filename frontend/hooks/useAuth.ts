@@ -104,28 +104,33 @@ export function useAuth(shouldCheck = true) {
           setUser(userData);
         }
         
+        // Forcer le rechargement de l'état auth depuis localStorage
+        checkAuth();
+        
         toast.success('Connexion réussie');
         
         // Attendre que l'état soit bien mis à jour
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise(resolve => setTimeout(resolve, 200));
         
         // Vérifier que l'utilisateur est bien défini avant de rediriger
-        const finalUser = user || (() => {
-          const token = localStorage.getItem('auth_token');
-          if (token) {
-            try {
-              const payload = JSON.parse(atob(token.split('.')[1]));
-              return {
-                id: payload.id,
-                email: payload.email,
-                role: payload.role,
-              };
-            } catch {
-              return null;
-            }
+        // Re-vérifier depuis localStorage au cas où setUser n'a pas encore mis à jour
+        const tokenCheck = localStorage.getItem('auth_token');
+        let finalUser = user;
+        
+        if (!finalUser && tokenCheck) {
+          try {
+            const payload = JSON.parse(atob(tokenCheck.split('.')[1]));
+            finalUser = {
+              id: payload.id,
+              email: payload.email,
+              role: payload.role,
+            };
+            setUser(finalUser); // Mettre à jour l'état
+            console.log('✅ User récupéré depuis localStorage');
+          } catch (e) {
+            console.error('Erreur décodage token:', e);
           }
-          return null;
-        })();
+        }
         
         if (finalUser) {
           console.log('✅ Utilisateur confirmé, redirection vers /admin/dashboard');
