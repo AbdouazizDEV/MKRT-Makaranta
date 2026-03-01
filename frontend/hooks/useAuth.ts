@@ -48,22 +48,19 @@ export function useAuth(shouldCheck = true) {
       
       if (response.data.success && response.data.data) {
         setUser(response.data.data);
+        
+        // Récupérer le token depuis le header X-Auth-Token (fallback pour cross-domain)
+        const token = response.headers['x-auth-token'] || response.headers['X-Auth-Token'];
+        if (token && typeof token === 'string') {
+          // Stocker le token dans localStorage comme fallback
+          localStorage.setItem('auth_token', token);
+          console.log('Token stocké dans localStorage');
+        }
+        
         toast.success('Connexion réussie');
         
-        // Vérifier si le cookie est présent dans la réponse
-        console.log('Response headers:', response.headers);
-        
-        // Attendre un peu pour que le cookie soit défini
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-        // Vérifier à nouveau l'auth pour s'assurer que le cookie est bien défini
-        try {
-          await checkAuth();
-          console.log('Auth check successful after login');
-        } catch (authError) {
-          console.error('Auth check failed after login:', authError);
-          // Continuer quand même, le cookie pourrait être défini
-        }
+        // Attendre un peu pour que le cookie soit défini (si disponible)
+        await new Promise(resolve => setTimeout(resolve, 300));
         
         // Utiliser window.location pour forcer un rechargement complet
         window.location.href = '/admin/dashboard';
@@ -81,11 +78,21 @@ export function useAuth(shouldCheck = true) {
   const logout = async () => {
     try {
       await api.post('/auth/logout');
+      // Supprimer le token du localStorage
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('auth_token');
+      }
       setUser(null);
       toast.success('Déconnexion réussie');
       router.push('/admin/login');
     } catch (error) {
       console.error('Erreur lors de la déconnexion:', error);
+      // Supprimer quand même le token local
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('auth_token');
+      }
+      setUser(null);
+      router.push('/admin/login');
     }
   };
 

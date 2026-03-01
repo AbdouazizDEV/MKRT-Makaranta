@@ -35,6 +35,13 @@ const api: AxiosInstance = axios.create({
 // Intercepteur de requête
 api.interceptors.request.use(
   (config) => {
+    // Ajouter le token depuis localStorage si disponible (fallback pour cross-domain)
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('auth_token');
+      if (token && !config.headers.Authorization) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+    }
     return config;
   },
   (error) => {
