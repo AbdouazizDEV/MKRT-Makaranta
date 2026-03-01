@@ -59,7 +59,10 @@ export class ServiceController {
       const updateData: UpdateServiceDTO = { ...req.body };
 
       if (updateData.published !== undefined) {
-        updateData.published = updateData.published === 'true' || updateData.published === true;
+        if (typeof updateData.published === 'string') {
+          updateData.published = updateData.published === 'true';
+        }
+        // Si c'est déjà un boolean, on le garde tel quel
       }
       if (updateData.order_index !== undefined) {
         updateData.order_index = Number(updateData.order_index);

@@ -7,7 +7,7 @@ import { CorsOptions } from 'cors';
 import env from './env';
 
 const corsOptions: CorsOptions = {
-  origin: (origin, callback) => {
+  origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
     // En développement, autoriser localhost
     if (env.NODE_ENV === 'development') {
       const allowedOrigins = [

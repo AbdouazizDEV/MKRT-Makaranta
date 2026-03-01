@@ -38,11 +38,9 @@ export class AuthService {
     }
 
     // Générer le token JWT
-    const token = jwt.sign(
-      { id: user.id, email: user.email, role: user.role },
-      env.JWT_SECRET,
-      { expiresIn: env.JWT_EXPIRES_IN }
-    );
+    const payload = { id: user.id, email: user.email, role: user.role };
+    // @ts-ignore - expiresIn accepte string (comme "7d") mais le type est strict
+    const token = jwt.sign(payload, env.JWT_SECRET, { expiresIn: env.JWT_EXPIRES_IN });
 
     return {
       user: {

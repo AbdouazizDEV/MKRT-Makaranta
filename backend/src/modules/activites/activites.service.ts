@@ -4,7 +4,7 @@
  */
 
 import { IActiviteRepository, ActiviteRepository } from './activites.repository';
-import { CreateActiviteDTO, UpdateActiviteDTO } from './activites.types';
+import { Activite, CreateActiviteDTO, UpdateActiviteDTO } from './activites.types';
 import { ApiError } from '../../shared/utils/ApiError';
 
 export class ActiviteService {

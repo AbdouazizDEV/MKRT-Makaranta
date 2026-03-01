@@ -76,7 +76,9 @@ export class ActiviteController {
         image_url: imageUrl,
         image_alt: imageAlt,
         date: req.body.date,
-        published: req.body.published === 'true' || req.body.published === true,
+        published: typeof req.body.published === 'string' 
+          ? req.body.published === 'true' 
+          : Boolean(req.body.published),
       };
 
       const activite = await this.service.create(data);
@@ -107,7 +109,10 @@ export class ActiviteController {
 
       // Convertir published en boolean si présent
       if (updateData.published !== undefined) {
-        updateData.published = updateData.published === 'true' || updateData.published === true;
+        if (typeof updateData.published === 'string') {
+          updateData.published = updateData.published === 'true';
+        }
+        // Si c'est déjà un boolean, on le garde tel quel
       }
 
       const activite = await this.service.update(id, updateData);
