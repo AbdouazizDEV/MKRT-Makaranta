@@ -6,7 +6,7 @@
 import axios, { AxiosInstance, AxiosError } from 'axios';
 import { ApiResponse } from './api.types';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || (typeof window !== 'undefined' ? window.location.origin.replace('3000', '5000') + '/api' : 'http://localhost:5000/api');
 
 // Création de l'instance Axios
 const api: AxiosInstance = axios.create({

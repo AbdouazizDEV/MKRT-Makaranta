@@ -12,7 +12,7 @@ export function HeroSection() {
   return (
     <section className="relative h-screen flex items-center justify-center bg-gradient-to-br from-[#0D1B2A] to-[#1A2B3D] text-white overflow-hidden">
       {/* Image de fond avec overlay */}
-      <div className="absolute inset-0 bg-[url('/images/hero-bg.jpg')] bg-cover bg-center opacity-20" />
+      <div className="absolute inset-0 bg-gradient-to-br from-[#0D1B2A] to-[#1A2B3D] opacity-100" />
       <div className="absolute inset-0 bg-[#0D1B2A] opacity-60" />
 
       {/* Contenu */}
