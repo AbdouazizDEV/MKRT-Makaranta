@@ -6,7 +6,22 @@
 import axios, { AxiosInstance, AxiosError } from 'axios';
 import { ApiResponse } from './api.types';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || (typeof window !== 'undefined' ? window.location.origin.replace('3000', '5000') + '/api' : 'http://localhost:5000/api');
+// Construire l'URL de l'API en s'assurant qu'elle se termine par /api
+const getApiUrl = (): string => {
+  const envUrl = process.env.NEXT_PUBLIC_API_URL;
+  if (envUrl) {
+    // Si l'URL se termine déjà par /api, on la garde telle quelle
+    // Sinon, on l'ajoute
+    return envUrl.endsWith('/api') ? envUrl : `${envUrl.replace(/\/$/, '')}/api`;
+  }
+  // Fallback pour le développement local
+  if (typeof window !== 'undefined') {
+    return window.location.origin.replace('3000', '5000') + '/api';
+  }
+  return 'http://localhost:5000/api';
+};
+
+const API_URL = getApiUrl();
 
 // Création de l'instance Axios
 const api: AxiosInstance = axios.create({
