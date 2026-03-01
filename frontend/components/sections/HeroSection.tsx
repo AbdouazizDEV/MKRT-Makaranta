@@ -5,28 +5,31 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { Button } from '@/components/ui/Button';
 import { ChevronDown } from 'lucide-react';
+import { useState } from 'react';
 
 export function HeroSection() {
+  const [imageError, setImageError] = useState(false);
+
   return (
     <section className="relative h-screen flex items-center justify-center text-white overflow-hidden">
       {/* Image de fond */}
       <div className="absolute inset-0">
-        <img
-          src="/hero-bg.jpg"
-          alt="LUMINA - Éducation et autonomisation"
-          className="w-full h-full object-cover"
-          onError={(e) => {
-            // Fallback vers gradient si l'image ne charge pas
-            const target = e.target as HTMLImageElement;
-            target.style.display = 'none';
-            const parent = target.parentElement;
-            if (parent) {
-              parent.className = 'absolute inset-0 bg-gradient-to-br from-[#0D1B2A] to-[#1A2B3D]';
-            }
-          }}
-        />
+        {!imageError ? (
+          <Image
+            src="/hero-bg.jpg"
+            alt="LUMINA - Éducation et autonomisation"
+            fill
+            priority
+            className="object-cover"
+            onError={() => setImageError(true)}
+            quality={90}
+          />
+        ) : (
+          <div className="w-full h-full bg-gradient-to-br from-[#0D1B2A] to-[#1A2B3D]" />
+        )}
         {/* Overlay sombre pour améliorer la lisibilité */}
         <div className="absolute inset-0 bg-gradient-to-br from-[#0D1B2A] to-[#1A2B3D] opacity-70" />
         <div className="absolute inset-0 bg-[#0D1B2A] opacity-50" />
