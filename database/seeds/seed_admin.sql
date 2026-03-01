@@ -1,0 +1,13 @@
+-- Seed: Création d'un compte administrateur par défaut
+-- 
+-- IMPORTANT: Ce fichier SQL ne contient pas de hash valide.
+-- Utilisez le script Node.js seed_admin.js pour créer le compte admin :
+--   cd database/seeds
+--   node seed_admin.js
+--
+-- Le script génère automatiquement le hash bcrypt pour le mot de passe "Admin123!"
+--
+-- Compte par défaut:
+--   Email: admin@lumina.org
+--   Password: Admin123!
+--   ⚠️  Changez le mot de passe en production !

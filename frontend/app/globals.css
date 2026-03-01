@@ -1,0 +1,29 @@
+/**
+ * Styles globaux avec Tailwind CSS
+ */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-primary: #0D1B2A;
+  --color-accent: #F4A823;
+  --color-bg: #F5F0E8;
+  --color-text: #1A1A2E;
+  --color-muted: #6B7280;
+  --color-white: #FFFFFF;
+}
+
+body {
+  color: var(--color-text);
+  background-color: var(--color-bg);
+}
+
+.font-display {
+  font-family: var(--font-display), serif;
+}
+
+.font-body {
+  font-family: var(--font-body), sans-serif;
+}
