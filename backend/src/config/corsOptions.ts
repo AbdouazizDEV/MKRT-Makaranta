@@ -24,12 +24,28 @@ const corsOptions: CorsOptions = {
         callback(new Error('Non autorisé par CORS'));
       }
     } else {
-      // En production, autoriser uniquement l'origine du frontend
-      const allowedOrigin = process.env.FRONTEND_URL || 'https://lumina.org';
-      if (origin === allowedOrigin) {
+      // En production, autoriser l'origine du frontend Vercel
+      const allowedOrigins = [
+        process.env.FRONTEND_URL,
+        // Pattern pour accepter toutes les URLs Vercel
+        /^https:\/\/.*\.vercel\.app$/,
+      ].filter(Boolean);
+      
+      // Vérifier si l'origine est autorisée
+      const isAllowed = !origin || allowedOrigins.some(allowed => {
+        if (typeof allowed === 'string') {
+          return origin === allowed;
+        }
+        if (allowed instanceof RegExp) {
+          return allowed.test(origin);
+        }
+        return false;
+      });
+      
+      if (isAllowed) {
         callback(null, true);
       } else {
-        callback(new Error('Non autorisé par CORS'));
+        callback(new Error(`Non autorisé par CORS: ${origin}`));
       }
     }
   },

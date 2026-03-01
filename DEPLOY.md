@@ -32,10 +32,13 @@ Ce guide explique comment déployer l'application LUMINA sur Vercel.
    - Cliquez sur **"Save"**
    - **Framework Preset** : Next.js (détecté automatiquement)
    - **Build Command** : `npm run build` (par défaut)
-   - **Output Directory** : `.next` (par défaut)
+   - **Output Directory** : `.next` ⚠️ **IMPORTANT : Configurez ceci !**
+     - Si ce champ n'est pas automatiquement rempli, entrez : `.next`
    - **Install Command** : `npm install` (par défaut)
    
    ⚠️ **Sans cette configuration, le build échouera !**
+   
+   **Note** : Le fichier `frontend/vercel.json` est maintenant présent pour spécifier automatiquement ces paramètres.
 
 4. **Variables d'environnement**
    Ajoutez les variables suivantes dans les paramètres du projet :
