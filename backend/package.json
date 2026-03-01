@@ -8,7 +8,8 @@
     "build": "tsc",
     "start": "node dist/server.js",
     "migrate": "node run-migrations.js",
-    "seed": "node seed-admin.js"
+    "seed": "node run-seed.js",
+    "seed:admin": "node run-seed.js"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",
