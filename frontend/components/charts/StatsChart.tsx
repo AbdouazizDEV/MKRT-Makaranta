@@ -38,6 +38,7 @@ export function StatsChart({ activites, services, messages }: StatsChartProps) {
     const months: ChartData[] = [];
     const now = new Date();
     
+    // Créer un tableau avec les 6 derniers mois
     for (let i = 5; i >= 0; i--) {
       const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
       const monthKey = date.toLocaleDateString('fr-FR', { month: 'short', year: 'numeric' });
@@ -50,41 +51,60 @@ export function StatsChart({ activites, services, messages }: StatsChartProps) {
       });
     }
 
-    // Fonction helper pour trouver l'index du mois
+    // Fonction helper pour trouver l'index du mois d'une date
     const getMonthIndex = (date: Date): number => {
       const year = date.getFullYear();
       const month = date.getMonth();
       
-      return months.findIndex((m) => {
-        const monthDate = new Date(m.month + ' 1');
+      return months.findIndex((m, index) => {
+        // Calculer la date du mois correspondant
+        const monthDate = new Date(now.getFullYear(), now.getMonth() - (5 - index), 1);
         return monthDate.getMonth() === month && monthDate.getFullYear() === year;
       });
     };
 
     // Compter les activités par mois (utiliser created_at)
     activites.forEach((activite) => {
-      const date = new Date(activite.created_at);
-      const monthIndex = getMonthIndex(date);
-      if (monthIndex >= 0) {
-        months[monthIndex].activites++;
+      try {
+        const date = new Date(activite.created_at);
+        if (!isNaN(date.getTime())) {
+          const monthIndex = getMonthIndex(date);
+          if (monthIndex >= 0 && monthIndex < months.length) {
+            months[monthIndex].activites++;
+          }
+        }
+      } catch {
+        // Ignorer les dates invalides
       }
     });
 
     // Compter les services par mois
     services.forEach((service) => {
-      const date = new Date(service.created_at);
-      const monthIndex = getMonthIndex(date);
-      if (monthIndex >= 0) {
-        months[monthIndex].services++;
+      try {
+        const date = new Date(service.created_at);
+        if (!isNaN(date.getTime())) {
+          const monthIndex = getMonthIndex(date);
+          if (monthIndex >= 0 && monthIndex < months.length) {
+            months[monthIndex].services++;
+          }
+        }
+      } catch {
+        // Ignorer les dates invalides
       }
     });
 
     // Compter les messages par mois
     messages.forEach((message) => {
-      const date = new Date(message.created_at);
-      const monthIndex = getMonthIndex(date);
-      if (monthIndex >= 0) {
-        months[monthIndex].messages++;
+      try {
+        const date = new Date(message.created_at);
+        if (!isNaN(date.getTime())) {
+          const monthIndex = getMonthIndex(date);
+          if (monthIndex >= 0 && monthIndex < months.length) {
+            months[monthIndex].messages++;
+          }
+        }
+      } catch {
+        // Ignorer les dates invalides
       }
     });
 
