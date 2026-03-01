@@ -20,18 +20,28 @@ export class AuthController {
     try {
       const { email, password } = req.body;
 
+      console.log('🔐 Tentative de connexion pour:', email);
+
       const authResponse = await authService.login({ email, password });
 
+      console.log('✅ Connexion réussie pour:', email);
+
       // Définir le token en cookie httpOnly
+      // En production, utiliser 'none' pour sameSite car frontend et backend sont sur des domaines différents
+      const isProduction = process.env.NODE_ENV === 'production';
       res.cookie('token', authResponse.token, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
+        secure: isProduction, // HTTPS requis en production
+        sameSite: isProduction ? 'none' : 'strict', // 'none' pour cross-domain, 'strict' pour same-domain
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 jours
+        path: '/', // Accessible sur tout le site
       });
+
+      console.log('🍪 Cookie défini avec sameSite:', isProduction ? 'none' : 'strict');
 
       res.json(ApiResponseBuilder.success(authResponse.user, 'Connexion réussie'));
     } catch (error) {
+      console.error('❌ Erreur lors du login:', error);
       next(error);
     }
   }
@@ -42,7 +52,13 @@ export class AuthController {
    */
   async logout(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      res.clearCookie('token');
+      const isProduction = process.env.NODE_ENV === 'production';
+      res.clearCookie('token', {
+        httpOnly: true,
+        secure: isProduction,
+        sameSite: isProduction ? 'none' : 'strict',
+        path: '/',
+      });
       res.json(ApiResponseBuilder.success(null, 'Déconnexion réussie'));
     } catch (error) {
       next(error);
