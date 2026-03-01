@@ -26,35 +26,25 @@ export default function AdminLayout({
   }
 
   useEffect(() => {
-    // Attendre un peu pour que useAuth ait le temps de charger
-    const checkAuth = setTimeout(() => {
-      if (!loading) {
-        // Vérifier localStorage directement
-        const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
-        
-        if (!token) {
-          console.log('❌ Pas de token, redirection vers login');
-          router.replace('/admin/login');
-          return;
-        }
-        
-        // Si on a un token mais pas d'utilisateur, essayer de décoder le token
-        if (!user && token) {
-          try {
-            const payload = JSON.parse(atob(token.split('.')[1]));
-            console.log('✅ Token valide trouvé, utilisateur:', payload.email);
-            // L'utilisateur sera défini par useAuth, on attend juste
-            // Ne pas rediriger si on a un token valide
-          } catch (e) {
-            console.error('❌ Token invalide:', e);
-            localStorage.removeItem('auth_token');
-            router.replace('/admin/login');
-          }
-        }
+    // Ne rediriger vers login que si on n'a vraiment pas de token
+    // Si on a un token, attendre que useAuth le charge
+    if (!loading) {
+      const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+      
+      // Si pas de token ET pas d'utilisateur, rediriger vers login
+      if (!token && !user) {
+        console.log('❌ Pas de token ni utilisateur, redirection vers login');
+        router.replace('/admin/login');
+        return;
       }
-    }, 100); // Attendre 100ms pour que useAuth charge
-    
-    return () => clearTimeout(checkAuth);
+      
+      // Si on a un token mais pas d'utilisateur, attendre un peu
+      // useAuth devrait charger l'utilisateur depuis le token
+      if (token && !user) {
+        console.log('⏳ Token présent, attente chargement utilisateur...');
+        // Ne pas rediriger, attendre que useAuth charge
+      }
+    }
   }, [user, loading, router]);
 
   // Vérifier aussi localStorage directement si user n'est pas encore chargé
@@ -69,9 +59,11 @@ export default function AdminLayout({
     );
   }
 
-  // Si pas d'utilisateur mais qu'on a un token, attendre un peu
+  // Si pas d'utilisateur mais qu'on a un token, attendre que useAuth charge
+  // Ne pas rediriger immédiatement, laisser useAuth faire son travail
   if (!user && hasToken) {
-    // Le token existe, useAuth devrait le charger bientôt
+    // Le token existe, useAuth devrait le charger
+    // Attendre un peu avant de rediriger
     return (
       <div className="flex items-center justify-center min-h-screen bg-[#F5F0E8]">
         <p className="text-gray-600">Chargement...</p>
@@ -79,8 +71,9 @@ export default function AdminLayout({
     );
   }
 
+  // Seulement rediriger si vraiment pas de token ET pas d'utilisateur
   if (!user && !hasToken) {
-    // Pas d'utilisateur et pas de token, rediriger
+    // Pas d'utilisateur et pas de token, ne rien afficher (redirection en cours)
     return null;
   }
 

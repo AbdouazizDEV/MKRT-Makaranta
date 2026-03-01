@@ -80,12 +80,13 @@ export function useAuth(shouldCheck = true) {
           // Décoder le token pour récupérer les infos utilisateur
           try {
             const payload = JSON.parse(atob(token.split('.')[1]));
-            setUser({
+            const decodedUser = {
               id: payload.id,
               email: payload.email,
               role: payload.role,
-            });
-            console.log('✅ User défini depuis token décodé');
+            };
+            setUser(decodedUser);
+            console.log('✅ User défini depuis token décodé:', decodedUser);
           } catch (e) {
             console.error('Erreur décodage token:', e);
             // Utiliser les données de la réponse si le décodage échoue
@@ -105,13 +106,36 @@ export function useAuth(shouldCheck = true) {
         
         toast.success('Connexion réussie');
         
-        // Attendre un peu pour que localStorage soit écrit et l'état mis à jour
-        await new Promise(resolve => setTimeout(resolve, 300));
+        // Attendre que l'état soit bien mis à jour
+        await new Promise(resolve => setTimeout(resolve, 100));
         
-        // Rediriger avec window.location pour forcer un rechargement complet
-        // Cela permet au layout admin de détecter le token dans localStorage
-        console.log('🔄 Redirection vers /admin/dashboard');
-        window.location.href = '/admin/dashboard';
+        // Vérifier que l'utilisateur est bien défini avant de rediriger
+        const finalUser = user || (() => {
+          const token = localStorage.getItem('auth_token');
+          if (token) {
+            try {
+              const payload = JSON.parse(atob(token.split('.')[1]));
+              return {
+                id: payload.id,
+                email: payload.email,
+                role: payload.role,
+              };
+            } catch {
+              return null;
+            }
+          }
+          return null;
+        })();
+        
+        if (finalUser) {
+          console.log('✅ Utilisateur confirmé, redirection vers /admin/dashboard');
+          // Utiliser window.location pour forcer un rechargement complet
+          window.location.href = '/admin/dashboard';
+        } else {
+          console.error('❌ Utilisateur non défini après login');
+          toast.error('Erreur lors de la connexion');
+        }
+        
         return true;
       }
       return false;
