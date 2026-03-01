@@ -8,7 +8,8 @@ import { useActivites } from '@/hooks/useActivites';
 import { useServices } from '@/hooks/useServices';
 import { useMessages } from '@/hooks/useMessages';
 import { Card, CardContent } from '@/components/ui/Card';
-import { Activity, Briefcase, Mail } from 'lucide-react';
+import { Activity, Briefcase, Mail, TrendingUp } from 'lucide-react';
+import { StatsChart } from '@/components/charts/StatsChart';
 
 export default function DashboardPage() {
   const { activites } = useActivites(true);
@@ -42,7 +43,9 @@ export default function DashboardPage() {
       <h1 className="text-3xl font-display font-bold text-[#0D1B2A] mb-8">
         Dashboard
       </h1>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      
+      {/* Statistiques */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         {stats.map((stat) => {
           const Icon = stat.icon;
           return (
@@ -69,6 +72,23 @@ export default function DashboardPage() {
           );
         })}
       </div>
+
+      {/* Graphique en courbes */}
+      <Card className="mt-8">
+        <CardContent className="p-6">
+          <div className="flex items-center gap-2 mb-6">
+            <TrendingUp className="w-6 h-6 text-[#0D1B2A]" />
+            <h2 className="text-2xl font-display font-bold text-[#0D1B2A]">
+              Évolution des données (6 derniers mois)
+            </h2>
+          </div>
+          <StatsChart 
+            activites={activites} 
+            services={services} 
+            messages={messages} 
+          />
+        </CardContent>
+      </Card>
     </div>
   );
 }
