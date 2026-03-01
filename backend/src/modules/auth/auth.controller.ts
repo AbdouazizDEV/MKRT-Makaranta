@@ -54,7 +54,11 @@ export class AuthController {
       
       console.log('🔑 Token envoyé dans header X-Auth-Token');
 
-      res.json(ApiResponseBuilder.success(authResponse.user, 'Connexion réussie'));
+      // Envoyer aussi le token dans la réponse JSON comme fallback
+      res.json(ApiResponseBuilder.success({
+        ...authResponse.user,
+        token: authResponse.token, // Ajouter le token dans la réponse
+      }, 'Connexion réussie'));
     } catch (error) {
       console.error('❌ Erreur lors du login:', error);
       next(error);

@@ -55,38 +55,52 @@ export function useAuth(shouldCheck = true) {
       console.log('Response headers:', response.headers);
       
       if (response.data.success && response.data.data) {
-        // Récupérer le token depuis le header X-Auth-Token
-        // Axios met les headers en minuscules
+        // Récupérer le token depuis le header X-Auth-Token ou depuis la réponse JSON
         const token = response.headers['x-auth-token'] || 
                      response.headers['X-Auth-Token'] ||
-                     (response.headers as any)['x-auth-token'];
+                     (response.headers as any)['x-auth-token'] ||
+                     (response.data.data as any)?.token; // Fallback: token dans la réponse JSON
         
-        console.log('Token from header:', token);
+        console.log('Token from header:', response.headers['x-auth-token']);
+        console.log('Token from data:', (response.data.data as any)?.token);
+        console.log('Final token:', token);
         
         if (token && typeof token === 'string') {
           // Stocker le token dans localStorage
           localStorage.setItem('auth_token', token);
-          console.log('Token stocké dans localStorage');
+          console.log('✅ Token stocké dans localStorage');
+          
+          // Extraire les données utilisateur (sans le token)
+          const userData = {
+            id: response.data.data.id,
+            email: response.data.data.email,
+            role: response.data.data.role,
+          };
           
           // Décoder le token pour récupérer les infos utilisateur
           try {
             const payload = JSON.parse(atob(token.split('.')[1]));
-            const userData = {
+            setUser({
               id: payload.id,
               email: payload.email,
               role: payload.role,
-            };
-            setUser(userData);
-            console.log('User défini depuis token:', userData);
+            });
+            console.log('✅ User défini depuis token décodé');
           } catch (e) {
             console.error('Erreur décodage token:', e);
             // Utiliser les données de la réponse si le décodage échoue
-            setUser(response.data.data);
+            setUser(userData);
+            console.log('✅ User défini depuis données réponse');
           }
         } else {
-          console.warn('Pas de token dans les headers, utilisation des données de réponse');
-          // Si pas de token dans le header, utiliser les données de la réponse
-          setUser(response.data.data);
+          console.warn('⚠️ Pas de token trouvé, utilisation des données de réponse uniquement');
+          // Si pas de token, utiliser les données de la réponse
+          const userData = {
+            id: response.data.data.id,
+            email: response.data.data.email,
+            role: response.data.data.role,
+          };
+          setUser(userData);
         }
         
         toast.success('Connexion réussie');
