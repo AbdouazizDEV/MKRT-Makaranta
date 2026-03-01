@@ -27,7 +27,7 @@ Ce guide explique comment déployer le backend LUMINA sur Render.
      - **Region** : Choisissez la région la plus proche
      - **Plan** : Free (pour commencer)
    - Cliquez sur **"Create Database"**
-   - ⚠️ **IMPORTANT** : Notez l'**Internal Database URL** et l'**External Database URL**
+   - ⚠️ **IMPORTANT** : Notez l'**Internal Database URL** et l'**External Database URL**postgresql://lumina_db_ubmh_user:T9Ru4bxakpnsmdABXod9vDKlU7YULzsb@dpg-d6hsbfua2pns738nh2s0-a/lumina_db_ubmh
 
 3. **Exécuter les migrations SQL**
    - Une fois la base de données créée, vous pouvez :
@@ -98,22 +98,59 @@ Une fois le backend déployé, vous obtiendrez une URL comme : `https://lumina-b
    - Render redéploiera automatiquement après un push sur GitHub
    - Ou déclenchez un redéploiement manuel depuis le dashboard
 
-### Étape 4 : Créer le compte admin
+### Étape 4 : Exécuter les migrations SQL
+
+⚠️ **IMPORTANT** : Les migrations doivent être exécutées AVANT de pouvoir utiliser l'API.
 
 1. **Se connecter à la base de données**
-   - Utilisez l'**External Database URL** de Render
-   - Connectez-vous avec un client PostgreSQL
+   - Dans Render, allez dans votre base de données PostgreSQL
+   - Cliquez sur **"Connect"** ou utilisez l'**External Database URL**
+   - Vous pouvez utiliser :
+     - **pgAdmin** (outil graphique)
+     - **DBeaver** (outil graphique)
+     - **psql** (ligne de commande)
+     - **Render Shell** (console SQL intégrée)
 
-2. **Exécuter le script de seed**
-   - Vous pouvez exécuter le script `backend/seed-admin.js` localement en pointant vers la base de données Render
-   - Ou créer manuellement le compte admin via SQL
+2. **Exécuter les migrations dans l'ordre**
+   - Exécutez les fichiers SQL dans `database/migrations/` dans cet ordre :
+     ```
+     001_create_users.sql
+     002_create_activites.sql
+     003_create_services.sql
+     004_create_messages.sql
+     ```
+   - Copiez-collez le contenu de chaque fichier dans votre client SQL et exécutez-le
+
+3. **Vérifier que les tables sont créées**
+   - Exécutez : `SELECT table_name FROM information_schema.tables WHERE table_schema = 'public';`
+   - Vous devriez voir : `users`, `activites`, `services`, `messages`
+
+### Étape 5 : Créer le compte admin
+
+1. **Option 1 : Utiliser le script seed (recommandé)**
+   - Clonez le repository localement
+   - Créez un fichier `.env` dans `backend/` avec :
+     ```env
+     DATABASE_URL=<votre_external_database_url_de_render>
+     ```
+   - Exécutez : `cd backend && npm run seed`
+   - Le compte admin sera créé automatiquement
+
+2. **Option 2 : Créer manuellement via SQL**
+   - Connectez-vous à la base de données
+   - Exécutez le contenu de `database/seeds/seed_admin.sql`
+   - Ou utilisez le script `backend/seed-admin.js` localement
 
 3. **Compte admin par défaut**
    - Email : `admin@lumina.org`
    - Password : `Admin123!`
-   - ⚠️ Changez ce mot de passe en production !
+   - ⚠️ **Changez ce mot de passe en production !**
 
-### Étape 5 : Mettre à jour le frontend Vercel
+4. **Tester la connexion**
+   - Utilisez le script : `cd backend && node test-connection.js`
+   - Il vérifiera la connexion et l'existence des tables
+
+### Étape 6 : Mettre à jour le frontend Vercel
 
 1. **Ajouter la variable d'environnement sur Vercel**
    - Allez dans votre projet Vercel
@@ -156,10 +193,30 @@ Pour les variables sensibles (JWT_SECRET, DATABASE_URL, etc.) :
 
 ## 🐛 Dépannage
 
+### Erreur 500 sur /api/auth/login
+**Causes possibles :**
+1. **Les migrations SQL n'ont pas été exécutées**
+   - Vérifiez que les tables existent : `SELECT table_name FROM information_schema.tables WHERE table_schema = 'public';`
+   - Si les tables n'existent pas, exécutez les migrations (voir Étape 4)
+
+2. **Le compte admin n'existe pas**
+   - Vérifiez : `SELECT * FROM users WHERE email = 'admin@lumina.org';`
+   - Si aucun résultat, créez le compte admin (voir Étape 5)
+
+3. **Problème de connexion à la base de données**
+   - Vérifiez que `DATABASE_URL` est correct dans les variables d'environnement Render
+   - Utilisez l'**Internal Database URL** (pas External)
+   - Testez avec : `cd backend && node test-connection.js`
+
+4. **Variables d'environnement manquantes**
+   - Vérifiez que `JWT_SECRET` est défini et contient au moins 32 caractères
+   - Vérifiez que toutes les variables sont présentes dans Render
+
 ### Erreur de connexion à la base de données
 - Vérifiez que vous utilisez l'**Internal Database URL** (pas External)
 - Vérifiez que la base de données est bien démarrée sur Render
 - Vérifiez les logs du service web sur Render
+- Utilisez le script `test-connection.js` pour diagnostiquer
 
 ### Erreur CORS
 - Vérifiez que l'URL du frontend Vercel est dans la liste des origines autorisées
