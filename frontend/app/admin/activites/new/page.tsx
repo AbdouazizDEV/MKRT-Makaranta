@@ -67,9 +67,9 @@ export default function ActiviteFormPage() {
   const onSubmit = async (data: ActiviteFormData) => {
     try {
       if (id && existingActivite) {
-        await update(id, { ...data, image });
+        await update(id, { ...data, image: image || undefined });
       } else {
-        await create({ ...data, image });
+        await create({ ...data, image: image || undefined });
       }
       router.push('/admin/activites');
     } catch (error) {
