@@ -200,7 +200,7 @@ Voir la documentation complète dans les fichiers du projet pour plus de détail
 
 ## 👤 Compte admin par défaut
 
-Après avoir exécuté le seed :
+Après avoir exécuté le seed : https://mkrt-makaranta.vercel.app/admin/login
 - **Email** : admin@lumina.org
 - **Password** : `Admin123!` (à changer en production)
 
